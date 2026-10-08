@@ -280,6 +280,7 @@
             font-family:Georgia, serif;
         }
     </style>
+    </head>
     <body>
         <main>
             <h1>CELLect</h1>
@@ -298,9 +299,222 @@
             <button class="next" id="next" style="display:none;">Continue</button>
             </div> <div class="card" id="scard" style="display:none;"></div>
         </div>
-
         <script>
+            const QUESTION = "Where do you think it belongs?";
+            const LEFT = "Mitosis", RIGHT="Meiosis";
+            const MAX_ANSWERS = 10;
+            const POOL = [
+                {e: "🤔", a: "L", why: "Ewan"},
+                {e: "🧐", a: "R", why: "Ewan"},
+                {e: "🤗", a: "L", why: "Ewan"},
+                {e: "😌", a: "R", why: "Ewan"},
+                {e: "😊", a: "L", why: "Ewan"},
+                {e: "💖", a: "R", why: "Ewan"},
+                {e: "🌺", a: "L", why: "Ewan"},
+                {e: "🛡️", a: "R", why: "Ewan"},
+                {e: "⚡", a: "L", why: "Ewan"},
+                {e: "💪🏻", a: "R", why: "Ewan"},
+            ];
+
+            const $ = id => document.getElementById(id);
+            const frame = $('frame'), glass = $('glass'), zoom = $('zoom'), zr = $('zr'), hint = $('hint');
+            const R = 64, BASE = 15, TOL = 0.4, ZS = [2.5, 3, 3.5, 4.5, 5, 5.5, 6, 6.5];
+            let items = [], log = [], lx = 0, ly = 0, Z = 4, over = false;
+            const sh = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+            const pic = it => it.img ? '<img alt="" src="'+it.img+'">': it.e;
+            function mk(it){
+                const d = document.createElement('div');
+                d.className = 'tile';
+                d.style.fontSize = it.s + 'px';
+                d.innerHTML = pic(it);
+                return d;
+            }
+            function start(){
+                frame.querySelectorAll('.tile').forEach(n => n.remove());
+                zoom.innerHTML = '';
+                log = [];
+                over = false;
+                $('modal').classList.remove('on');
+                $('scard').style.display = 'none';
+                $('qcard').style.display = '';
+
+                const pick = sh(POOL).slice(0, MAX_ANSWERS), cols = 5, rows = Math.ceil(pick.length / cols) + 1;
+                const cells = sh([...Array(cols * rows).keys()]).slice(0, pick.length);
+                items = pick.map((p, i) => {
+                    const c = cells[i] % cols, r = Math.floor(cells[i] / cols);
+                    return Object.assign({}, p, {z : p.z || ZS[Math.floor(Math.random() * ZS.length)], x : (c + 0.5 +(Math.random() - 0.5) * 0.5) / cols * 100, y : (r + 0.5 + (Math.random() - 0.5) * 0.4) / rows * 100, s : BASE + Math.round(Math.random() * 4), done : false})
+                });
+                items.forEach(it => {
+                    it.t = mk(it);
+                    it.zt = mk(it);
+                    [it.t, it.zt].forEach(t => {
+                        t.style.left = it.x + '%';
+                        t.style.top = it.y + '%'
+                    });
+                    frame.appendChild(it.t);
+                    zoom.appendChild(it.zt)
+                });
+                frame.appendChild(glass);
+                sizeZoom();
+                place(frame.clientWidth - R - 30, frame.clientHeight - R -30);
+                blur();
+                upd();
+                hint.textContent = '';
+            }
+
+            function sizeZoom(){
+                zoom.style.width = frame.clientWidth + 'px';
+                zoom.style.height = frame.clientHeight + 'px';
+            }
+
+            function place(x, y){
+                lx = Math.max(0, Math.min(frame.clientWidth, x)); 
+                ly = Math.max(0, Math.min(frame.clientHeight, y));
+                glass.style.left = (lx - R) + 'px';
+                glass.style.top = (ly - R) + 'px';
+                zoom.style.transform = 'translate(' + (R - 8 - lx * Z) + 'px, ' + (R - 8  - ly * Z) + 'px) scale('+ Z +')'
+            }
+
+            function blur(){
+                items.forEach(it => {
+                    if(it.done) return;
+                    const d = Math.abs(Z - it.z);
+                    it.zt.style.filter = d <= TOL ? 'none' : 'blur(' + Math.min(6, (d - TOL) * 1.2 + 0.6).toFixed(2) +'px)'
+                });
+            }
+
+            function upd(){
+                const c = log.filter(l => l.ok).length;
+                $('found').textContent = 'Answered: ' + log.length + ' / ' + items.length;
+                $('score').innerHTML = 'Correct: ' + c + ' &nbsp; Wrong: ' + (log.length - c);
+            }
+
+            zr.addEventListener('input', () => {Z =+ zr.value;
+                $('zv').textContent = Z.toFixed(1) + 'x';
+                place(lx, ly);
+                blur()
+            });
+
+            let drag = false, moved = 0, ox = 0, oy = 0, sx, sy;
+
+            glass.addEventListener('pointerdown', e => {
+                drag = true;
+                moved = 0;
+                sx = e.clientX;
+                sy = e.clientY;
+                const b = frame.getBoundingClientRect();
+                ox = lx - (e.clientX - b.left);
+                oy = ly - (e.clientY - b.top);
+                glass.setPointerCapture(e.pointerId);
+                glass.style.cursor = 'grabbing'
+            });
+            
+            glass.addEventListener('pointermove', e => {
+                if(!drag) return;
+                moved += Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy);
+                sx = e.clientX;
+                sy = e.clientY;
+                const b = frame.getBoundingClientRect();
+                place(e.clientX - b.left + ox, e.clientY - b.top + oy)
+            });
+
+            glass.addEventListener('pointerup', () => {
+                drag = false;
+                glass.style.cursor = 'grab';
+                if(moved < 6) inspect()
+            });
+
+            glass.addEventListener('keydown', e => {
+                const k = {
+                    ArrowLeft : [-12, 0], ArrowRight : [12, 0], ArrowUp : [0, -12], ArrowDown : [0, 12]
+                }[e.key];
+                if(k){
+                    place(lx + k[0], ly + k[1]);
+                    e.preventDefault();
+                } else if(e.key === 'Enter' || e.key === ' '){
+                    inspect(); e.preventDefault()
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                sizeZoom();
+                place(lx, ly);
+            });
+
+            function inspect(){
+                if(over) return;
+                let best = null, bd = 1e9;
+                items.forEach(it => {
+                    if(it.done) return;
+                    const d = Math.hypot(it.x / 100 * frame.clientWidth - lx, it.y / 100 * frame.clientHeight - ly);
+                    if(d < bd){
+                        bd = d;
+                        best = it
+                    }
+                });
+                if(!best || bd > 34){
+                    hint.textContent = 'Nothing under the magnifying glass. Move it over a picture.'; 
+                    return;
+                } 
+                if(Math.abs(Z - best.z) > TOL){
+                    hint.textContent = 'Still blurry. Adjust the magnification.'; 
+                    return;
+                }
+                hint.textContent = '';
+                ask(best);
+            }
+
+            function ask(it){
+                $('pic').innerHTML = pic(it);
+                $('q').textContent = QUESTION;
+                const bL = $('bL'), bR = $('bR'), fb = $('fb'), nx = $('next');
+                bL.textContent = LEFT;
+                bR.textContent = RIGHT;
+                bL.disabled = bR.disabled = false;
+                fb.innerHTML = '';
+                nx.style.display = 'none';
+                const answer = side => {
+                    if(over || it.done) return;
+                    bL.disabled = bR.disabled = true;
+                    const ok = side === it.a;
+                    it.done = true;
+                    it.t.remove();
+                    it.zt.remove();
+                    log.push({it, ok, pick : side});
+                    fb.innerHTML = (ok ? '<b class="ok">Correct!</b> ' : '<b class="bad">Not quite.</b> The answer is '+(it.a === 'L' ? LEFT : RIGHT) + '. ') + it.why;
+                        if(log.length >= items.length) over = true;
+                        nx.style.display = 'inline-block';
+                        nx.textContent = over ? 'See summary' : 'Continue'; 
+                        nx.focus();
+                        upd();
+                };
+                bL.onclick = () => answer('L');
+                bR.onclick = () => answer('R');
+                const leave = () => {
+                    if(over) summary(); else $('modal').classList.remove('on')
+                };
+                nx.onclick = leave;
+                $('x').onclick = leave;
+                $('qcard').style.display = '';
+                $('scard').style.display = 'none';
+                $('modal').classList.add('on');
+            }
+
+            function summary(){
+                const c = log.filter(l => l.ok).length, name = s => s === 'L' ? LEFT : RIGHT;
+                $('scard').innerHTML = '<h2>Summary</h2><div class = "sc">' + c + ' / ' + log.length + ' correct</div><p style="margin: 0 0 10px; color:var(--mute);"> No more answers are accepted. Here is what you found:</p>' + log.map(l => '<div class="row"><div class="em">' + pic(l.it) + '</div><div><b class="' + (l.ok ? 'ok' : 'bad') + '">' + (l.ok ? 'Correct' : 'Wrong') + '</b>. belongs to ' + name(l.it.a) + (l.ok ? '' : ' (you chose ' +name(l.pick)+')') + '<br><span style="color:var(--mute);">' + l.it.why +'</span></div></div>').join('') + '<button class="next" id="reset">Reset and play again.</button>';
+                $('qcard').style.display = 'none';
+                $('scard').style.display = '';
+                $('modal').classList.add('on');
+                $('reset').onclick = () => start(); 
+            }
+
+            document.addEventListener('keydown', e => {
+                if(e.key === 'Escape' && $('modal').classList.contains('on') && $('qcard').style.display !== 'none') $('x').click()
+            });
+
+            start();
             
         </script>
-
     </body>
+</html>
