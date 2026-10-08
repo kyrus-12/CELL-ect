@@ -502,7 +502,7 @@
 
             function summary(){
                 const c = log.filter(l => l.ok).length, name = s => s === 'L' ? LEFT : RIGHT;
-                $('scard').innerHTML = '<h2>Summary</h2><div class = "sc">' + c + ' / ' + log.length + ' correct</div><p style="margin: 0 0 10px; color:var(--mute);"> No more answers are accepted. Here is what you found:</p>' + log.map(l => '<div class="row"><div class="em">' + pic(l.it) + '</div><div><b class="' + (l.ok ? 'ok' : 'bad') + '">' + (l.ok ? 'Correct' : 'Wrong') + '</b>. belongs to ' + name(l.it.a) + (l.ok ? '' : ' (you chose ' +name(l.pick)+')') + '<br><span style="color:var(--mute);">' + l.it.why +'</span></div></div>').join('') + '<button class="next" id="reset">Reset and play again.</button>';
+                $('scard').innerHTML = '<h2>Summary</h2><div class = "sc">' + c + ' / ' + log.length + ' correct</div><p style="margin: 0 0 10px; color:var(--mute);"> No more answers are accepted. Here is what you found:</p>' + log.map(l => '<div class="row"><div class="em">' + pic(l.it) + '</div><div><b class="' + (l.ok ? 'ok' : 'bad') + '">' + (l.ok ? 'Correct' : 'Wrong') + '</b>. belongs to ' + name(l.it.a) + (l.ok ? '' : ' (you chose ' +name(l.pick)+')') + '<br><span style="color:var(--mute);">' + l.it.why +'</span></div></div>').join('') + '<button class="next" id="reset">Play again.</button>';
                 $('qcard').style.display = 'none';
                 $('scard').style.display = '';
                 $('modal').classList.add('on');
