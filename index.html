@@ -79,7 +79,7 @@
         }
         .grid{
             display:grid;
-            grid-template-columns:repeat(3, 1fr);
+            grid-template-columns:repeat(2, 1fr);
             gap:14px;
         }
         .opt{
@@ -140,13 +140,13 @@
         .pic{
             font-size:4rem;
             line-height:1;
-            height:84px;
+            height:100px;
             display:flex;
             align-items:center;
         }
         .pic img{
-            max-height:84px;
-            max-width:100px;
+            max-height:100px;
+            max-width:200px;
         }
         .cap{
             font-size:0.95rem;
@@ -342,7 +342,7 @@
                             if(owner === cur) cls += " cur";
                         }
                     } else if(owner >= 0 ) cls += " used";
-                    return `<button class="${cls}" ${done || owner >= 0 ? "disabled" : ""} onclick="pick(${i})"><span class="num">${i+1}</span><span class="mark">${m}</span>${hasPic(c) ? `<span class="pic">${pic(c)}</span>` : ""}<span class="cap${hasPic(c) ? "" : " big"}">${esc(c.label)}</span></button>`; 
+                    return `<button class="${cls}" ${done || owner >= 0 ? "disabled" : ""} onclick="pick(${i})"><span class="mark">${m}</span>${hasPic(c) ? `<span class="pic">${pic(c)}</span>` : ""}<span class="cap${hasPic(c) ? "" : " big"}">${esc(c.label)}</span></button>`; 
                 }).join("") + `</div>` + (done ? `<p class="legend"></p>` : "");
                 if(!done){
                     $("fb").innerHTML = `<h2>Reminder</h2><p class="muted">Reminder</p><p><strong>${cur}</strong> of ${N} answered</p>`;
