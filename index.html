@@ -355,7 +355,7 @@
                     h += `<div class="q ${ok ? "ok" : "no"} ${i === cur ? "cur" : ""}" onclick ="jump(${i})"><h3>${i + 1}. ${esc(qq.text) || "Picture problem"}</h3></div>` + 
                         (ok ? [qq.answer] : [picks[i], qq.answer]).map((j, k) => {
                             const c = C[j], good = j === qq.answer;
-                            return `<div class="row"><span>${j + i}</span><span class="e">${hasPic(c) ? pic(c) : ""}</span><span>${ k === 0 ? "Your answer: " : "Answer key: "}<strong>${esc(c.label)}</strong> <strong class="${good ? "ok" : "no"}">${good ? "✔ Correct " : "✘ Wrong "}</strong></span></div>`;
+                            return `<div class="row"><span class="e">${hasPic(c) ? pic(c) : ""}</span><span>${ k === 0 ? "Your answer: " : "Answer key: "}<strong>${esc(c.label)}</strong> <strong class="${good ? "ok" : "no"}">${good ? "✔ Correct " : "✘ Wrong "}</strong></span></div>`;
                         }).join("")+ `</div>`;
                 });
                 h += `<button class="btn" onclick="restart()">Try again</button>`;
