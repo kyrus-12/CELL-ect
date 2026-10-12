@@ -3,5 +3,388 @@
     <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Meosis Simulation</title>
+    <title>CELL-ect</title>
     <style>
+        :root{
+           --bg:#fff;
+           --ink:#000;
+           --mute:#444;
+           --line:#000;
+           --soft:#ececec;
+           --green:green;
+           --greenbg:#d8f3e0;
+           --red:red;
+           --redbg:#fbdcdc;
+           box-sizing:border-box;
+           padding-top:env(safe-area-inset-bottom, 0px);
+        }
+        *{
+            box-sizing:border-box;
+        }
+        body{
+            margin:0;
+            background:var(--bg);
+            color:var(--ink);
+            font-family:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            line-height:1.5;
+        }
+        .wrap{
+            max-width:1100px;
+            margin:0 auto;
+            padding: 20px;
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+        .card{
+            background:var(--bg);
+            border:1px solid var(--line);
+            border-radius:12px;
+            padding:18px;
+        }
+        .meta{
+            color:var(--mute);
+            font-size:0.8rem;
+            margin:0 0 6px;
+            text-transform:uppercase;
+            letter-spacing:0.08em;
+        }
+        .situation{
+            font-size:1.25rem;
+            font-weight:600;
+            margin:0;
+            white-space:pre-wrap;
+        }
+        .simg{
+            display:block;
+            max-width:100%;
+            max-height:300px;
+            margin-top:12px;
+            border:2px solid var(--line);
+            border-radius:10px;
+        }
+        .cols{
+            display:grid;
+            grid-template-columns:1fr 500px;
+            gap:16px;
+            align-items:start;
+        }
+        @media(max-width:760px){
+            .cols{grid-template-columns:1fr;
+            }
+        }
+        #fb{
+            max-height:620px;
+            overflow-y:auto;
+        }
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(3, 1fr);
+            gap:14px;
+        }
+        .opt{
+            position:relative;
+            min-height:150px;
+            justify-content:center;
+            background:var(--bg);
+            border:3px solid var(--line);
+            border-radius:12px;
+            padding:26px 8px 16px;
+            cursor:pointer;
+            text-align:center;
+            color:var(--ink);
+            font:inherit;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:8px;
+        }
+        .opt:hover:not(:disabled){
+            background:var(--soft);
+        }
+        .opt:disabled{
+            cursor:pointer;
+        }
+        .opt.used{
+            opacity:0.25;
+            cursor:not-allowed;
+        }
+        .opt.right{
+            background:var(--greenbg);
+            border-color:var(--green);
+            color:var(--green);
+        }
+        .opt.wrong{
+            background:var(--redbg);
+            border-color:var(--red);
+            color:var(--red);
+        }
+        .opt.cur{
+            outline:4px solid var(--ink);
+            outline-offset:2px;
+        }
+        .num{
+            position:absolute;
+            top:8px;
+            left:10px;
+            font-weight:700;
+            font-size:0.9rem;
+        }
+        .mark{
+            position:absolute;
+            top:8px;
+            right:10px;
+            font-weight:700;
+            font-size:0.85rem;
+        }
+        .pic{
+            font-size:4rem;
+            line-height:1;
+            height:84px;
+            display:flex;
+            align-items:center;
+        }
+        .pic img{
+            max-height:84px;
+            max-width:100px;
+        }
+        .cap{
+            font-size:0.95rem;
+            font-weight:600;
+        }
+        .cap.big{
+            font-size:1.15rem;
+        }
+        .legend{
+            margin:14px 0 0;
+            font-size:0.85rem;
+            color:var(--mute);
+        }
+        h2{
+            font-size:1.1rem;
+            margin:0 0 8px;
+        }
+        .score{
+            font-size:2.4rem;
+            font-weight:700;
+            margin:0;
+        }
+        .muted{
+            color:var(--mute);
+            margin:4px 0;
+        }
+        .q{
+            border:2px solid var(--line);
+            border-radius:10px;
+            padding:12px;
+            margin-top:12px;
+            cursor:pointer;
+            font-size:0.9rem;
+        }
+        .q.ok{
+            border-color:var(--green);
+        }
+        .q.no{
+            border-color:var(--red);
+        }
+        .q.cur{
+            background:var(--soft);
+        }
+        .q h3{
+            margin:0 0 4px;
+            font-size:0.95rem;
+        }
+        .res{
+            font-weight:700;
+            margin-bottom:6px;
+        }
+        .ok{
+            color:var(--green);
+        }
+        .no{
+            color:var(--red);
+        }
+        .row{
+            display:grid;
+            grid-template-columns:34px 34p 1fr;
+            gap:6px;
+            align-items:start;
+            padding:6px 0;
+            border-top:1px solid #bbb;
+        }
+        .row .e{
+            font-size:1.4rem;
+            line-height:1.2;   
+        }
+        .row .e img{
+            height:28px;
+        }
+        .btn{
+            font:inherit;
+            border:2px solid var(--ink);
+            background:var(--ink);
+            color:var(--bg);
+            padding:9px 16px;
+            border-radius:10px;
+            cursor:pointer;
+            width:100%;
+            margin-top:14px;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <section class="card">
+                <p class="meta" id="meta"></p>
+                <div id="sit"></div>
+            </section>
+            <div class="cols">
+                <section class="card" id="grid"></section>
+                <aside class="card" id="fb"></aside>
+            </div>
+        </div>
+        <script>
+            const CHOICES = [
+                {text:"Umbrella", emoji:"🤔"},
+                {text:"Umbrella", emoji:"🧐"},
+                {text:"Umbrella", emoji:"🤗"},
+                {text:"Umbrella", emoji:"😊"},
+                {text:"Umbrella", emoji:"😌"},
+                {text:"Umbrella", emoji:"😔"},
+            ];
+
+            const PROBLEMS = [
+                { story: "q", image: "", answer:1, why:[
+                    "w",
+                    "e",
+                    "r",
+                    "t",
+                    "y",
+                    "u",
+                ]},
+                { story: "l", image: "", answer:2, why:[
+                    "w",
+                    "e",
+                    "r",
+                    "t",
+                    "y",
+                    "u",
+                ]},
+                { story: "m", image: "", answer:3, why:[
+                    "w",
+                    "e",
+                    "r",
+                    "t",
+                    "y",
+                    "u",
+                ]},
+                { story: "o", image: "", answer:4, why:[
+                    "w",
+                    "e",
+                    "r",
+                    "t",
+                    "y",
+                    "u",
+                ]},
+                { story: "p", image: "", answer:5, why:[
+                    "w",
+                    "e",
+                    "r",
+                    "t",
+                    "y",
+                    "u",
+                ]},
+                { story: "k", image: "", answer:6, why:[
+                    "w",
+                    "e",
+                    "r",
+                    "t",
+                    "y",
+                    "u",
+                ]},
+            ];
+
+            const C = CHOICES.map(c => ({
+                label:c.text || "", e:c.emoji || "", img:c.image ||""           
+            }));
+
+            const Q = PROBLEMS.map(p => ({
+                text:p.story || "", img:p.image || "", answer:(p.answer || 1) -1, why:p.why || []
+            }));
+
+            const N = Q.length;
+
+            let cur = 0, picks = [], done = false;
+            const $ = id => document.getElementById(id);
+            const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+            const hasPic = c => !!(c.img || c.e);
+            const pic = c => c.img ? `<img src="${esc(c.img)}" alt="">` :esc(c.e);
+            const score = () => Q.reduce((s, q, i) => s + (picks[i] === q.answer ? 1 : 0), 0);
+
+            function render(){
+                if(C.length < N){
+                    $("meta").textContent = "Setup problem";
+                    $("sit").innerHTML = `<p class="situation"></p>`;
+                    return;
+                }
+                const q = Q[cur];
+                $("meta").textContent = (done ? "Reviewing " : "") + "Question " + (cur + 1) + " of " + N;
+                $("sit").innerHTML = (q.text ? `<p class="situation">${esc(q.text)}</p>` : "") + (q.img ? `<img class="simg" src="${esc(q.img)}" alt="">` : "");
+                $("grid").innerHTML = `<div class="grid">` + C.map((c, i) => {
+                    const owner = picks.indexOf(i);
+                    let cls = "opt", m = "";
+                    if(done){
+                        if(owner >= 0){
+                            const ok = picks[owner] === Q[owner].answer;
+                            cls += ok ? " right" : " wrong";
+                            m = (ok ? "✔" : "✘") + " Q" + (owner + 1);
+                            if(owner === cur) cls += " cur";
+                        }
+                    } else if(owner >= 0 ) cls += " used";
+                    return `<button class="${cls}" ${done || owner >= 0 ? "disabled" : ""} onclick="pick(${i})"><span class="num">${i+1}</span><span class="mark">${m}</span>${hasPic(c) ? `<span class="pic">${pic(c)}</span>` : ""}<span class="cap${hasPic(c) ? "" : " big"}">${esc(c.label)}</span></button>`; 
+                }).join("") + `</div>` + (done ? `<p class="legend"></p>` : "");
+                if(!done){
+                    $("fb").innerHTML = `<h2>Feedback</h2><p class="muted">Reminder</p><p><strong>${cur}</strong> of ${N} answered</p>`;
+                    return;
+                }
+                const s = score();
+                let h = `<h2>Your score</h2><p class="score">${s} / ${N}</p>`;
+                Q.forEach((qq, i) => {
+                    const ok = picks[i] === qq.answer;
+                    h += `<div class="q ${ok ? "ok" : "no"} ${i === cur ? "cur" : ""}" onclick ="jump(${i})"><h3>${i + 1}. ${esc(qq.text) || "Picture problem"}</h3>
+                        <div class="res ${ok ? "ok" : "no"}">${ok ? "✔ Correct" : "✘ Incorrect"}</div>` + 
+                        (ok ? [qq.answer] : [picks[i], qq.answer]).map((j, k) => {
+                            const c = C[j], good = j === qq.answer;
+                            return `<div class="row"><span>${j + i}</span><soan class="e">${hasPic(c) ? pic(c) : ""}</span><span>${ k === 0 ? "Your answer. " : "Answerkey. "}<strong>${esc(c.label)}</strong> <strong class="${good ? "ok" : "no"}">${good ? "✔ Correct " : "✘ Wrong "}</strong>${esc(qq.why[j]) || "No explanation added."}</span></div>`;
+                        }).join("")+ `</div>`;
+                });
+                h += `<button class="btn" onclick="restart()">Try again</button>`;
+                $("fb").innerHTML = h;
+            }
+
+            function pick(i){
+                if(done || picks.includes(i)) return;
+                picks[cur] = i;
+                if(cur <  N - 1) cur ++;
+                else { done = true; cur = 0;}
+                render();
+            }
+
+            function jump(i){
+                cur = i;
+                render();
+            }
+
+            function restart(){
+                picks = [];
+                done = false;
+                cur = 0;
+                render();
+                $("fb").scrollTop = 0;
+            }
+
+            render();
+        </script>
+
+    </body>
+    </html>
