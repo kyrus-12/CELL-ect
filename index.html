@@ -234,9 +234,9 @@
     </head>
     <body>
         <div class="wrap">
-            <img src="https://i.imgur.com/oG86ZV3.jpg">
             <section class="card">
-                <p class="meta" id="meta"></p>
+                <p class="meta" id="meta">Activity 1: CELL-ect</p>
+                <img src="https://i.imgur.com/oG86ZV3.jpg">
                 <div id="sit"></div>
             </section>
             <div class="cols">
@@ -329,7 +329,7 @@
                     return;
                 }
                 const q = Q[cur];
-                $("meta").textContent = (done ? "Reviewing " : "") + "Question " + (cur + 1) + " of " + N;
+                $("meta").textContent = (done ? "Reviewing " : "") + "Statement " + (cur + 1) + " of " + N;
                 $("sit").innerHTML = (q.text ? `<p class="situation">${esc(q.text)}</p>` : "") + (q.img ? `<img class="simg" src="${esc(q.img)}" alt="">` : "");
                 $("grid").innerHTML = `<div class="grid">` + C.map((c, i) => {
                     const owner = picks.indexOf(i);
