@@ -356,7 +356,7 @@
                         <div class="res ${ok ? "ok" : "no"}">${ok ? "✔ Correct" : "✘ Incorrect"}</div>` + 
                         (ok ? [qq.answer] : [picks[i], qq.answer]).map((j, k) => {
                             const c = C[j], good = j === qq.answer;
-                            return `<div class="row"><span>${j + i}</span><soan class="e">${hasPic(c) ? pic(c) : ""}</span><span>${ k === 0 ? "Your answer. " : "Answer key. "}<strong>${esc(c.label)}</strong> <strong class="${good ? "ok" : "no"}">${good ? "✔ Correct " : "✘ Wrong "}</strong>${good ? (esc(qq.why[j]) || "No explanation added.")}</span></div>`;
+                            return `<div class="row"><span>${j + i}</span><soan class="e">${hasPic(c) ? pic(c) : ""}</span><span>${ k === 0 ? "Your answer. " : "Answer key. "}<strong>${esc(c.label)}</strong> <strong class="${good ? "ok" : "no"}">${good ? "✔ Correct " : "✘ Wrong "}</strong>${good ? (esc(qq.why[j]) || "No explanation added.") : ""}</span></div>`;
                         }).join("")+ `</div>`;
                 });
                 h += `<button class="btn" onclick="restart()">Try again</button>`;
