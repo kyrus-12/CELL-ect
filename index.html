@@ -319,7 +319,7 @@
             const $ = id => document.getElementById(id);
             const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
             const hasPic = c => !!(c.img || c.e);
-            const pic = c => c.img ? `<img src="${esc(c.img)}" alt="">` :esc(c.e);
+            const pic = c => c.img ? `<img src="${esc(c.img)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='❌'">` : esc(c.e);
             const score = () => Q.reduce((s, q, i) => s + (picks[i] === q.answer ? 1 : 0), 0);
 
             function render(){
