@@ -344,7 +344,7 @@
                     return `<button class="${cls}" ${done || owner >= 0 ? "disabled" : ""} onclick="pick(${i})"><span class="num">${i+1}</span><span class="mark">${m}</span>${hasPic(c) ? `<span class="pic">${pic(c)}</span>` : ""}<span class="cap${hasPic(c) ? "" : " big"}">${esc(c.label)}</span></button>`; 
                 }).join("") + `</div>` + (done ? `<p class="legend"></p>` : "");
                 if(!done){
-                    $("fb").innerHTML = `<h2>Feedback</h2><p class="muted">Reminder</p><p><strong>${cur}</strong> of ${N} answered</p>`;
+                    $("fb").innerHTML = `<h2>Reminder</h2><p class="muted">Reminder</p><p><strong>${cur}</strong> of ${N} answered</p>`;
                     return;
                 }
                 const s = score();
